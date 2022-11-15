@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../static/bootstrap.min.css">
+    <script src="../static/sockjs.min.js"></script>
+    <script src="../static/stomp.min.js"></script>
+    <script defer src="../static/roulette.js"></script>
+    <link rel="icon" type="image/x-icon" href="../static/favicon.png">
+    <title>MyCasino</title>
+</head>
+<body class="bg-dark text-white" style="height: 100vh">
+<nav th:replace="~{fragments/nav :: nav (player=${player})}"></nav>
+<div class="container text-center">
+    <div class="row">
+        <div class="col-xl">
+            <p id="timer" class="h3" th:text="|Win number is: ${lastWinNumber}!|">WNTL</p>
+            <div style="width: 339px; height: 339px; margin: 0 auto; position: relative;">
+                <script defer th:inline="javascript">
+                    setTimeout(() => {
+                        const initialRotate = spin([[${lastWinNumber}]], true)
+                        document.getElementById("roulette").style = `transform: rotate(${initialRotate}deg);`
+                    }, 100)
+                </script>
+                <img id="roulette" src="../static/roulettePNG.png" alt="Roulette">
+                <svg style="position: absolute; top: 132px; right: -40px" width="64" height="64" fill="yellow"
+                     viewBox="0 0 16 16">
+                    <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
+                </svg>
+            </div>
+            <hr>
+            <div>
+                <p class="h4">Your balance: <span th:text="${player.getBalance()}" id="balance">0</span>$</p>
+            </div>
+            <div>
+                <div class="input-group mb-3 fs-5 justify-content-center">
+                    <input placeholder="Amount" class="w-75 border border-5 border-white" id="amount" type="number">
+                    <span class="input-group-text fs-5">$</span>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <button onclick="makeBet('RED')" type="button" class="btn btn-sm btn-danger w-25">Red</button>
+                    <button onclick="makeBet('GREEN')" type="button" class="btn btn-sm btn-success w-25 mx-3">
+                        Green
+                    </button>
+                    <button onclick="makeBet('BLACK')" type="button" class="btn btn-sm btn-dark w-25">Black</button>
+                </div>
+            </div>
+            <hr class="mb-0">
+            <div id="bets" class="bg-dark bg-gradient border border-3 my-0 border-dark"
+                 style="overflow-y: scroll; height: 110px">
+                <style>#chat:first-child {
+                    display: none
+                }</style>
+                <p id="betMessage" class="text-wrap my-1 fs-5" style="max-width: 600px; word-break: break-word;"></p>
+            </div>
+            <hr class="p-0 my-0">
+        </div>
+        <div class="col-xl">
+            <h1>Classic roulette</h1>
+            <hr>
+            <p class="h4">Rules:</p>
+            <ul class="list-group" style="list-style: none">
+                <li class="fs-5 text-start mx-xxl-5 px-xxl-5">Winning bet on red: 2x</li>
+                <li class="fs-5 text-start mx-xxl-5 px-xxl-5">Winning bet on black: 2x</li>
+                <li class="fs-5 text-start mx-xxl-5 px-xxl-5">Winning bet on green: 14x</li>
+                <li class="fs-5 text-start mx-xxl-5 px-xxl-5">Max bet volume: 1,000,000,000$</li>
+                <li class="fs-5 text-start mx-xxl-5 px-xxl-5">Min bet volume: 1$</li>
+            </ul>
+            <hr>
+            <p class="h4">Chat</p>
+            <hr class="mb-0">
+            <div id="chat" class="bg-dark bg-gradient border border-3 my-0 border-dark"
+                 style="overflow-y: scroll; height: 240px;">
+                <style>#chat:first-child {
+                    display: none
+                }</style>
+                <p id="chatMessage" class="text-wrap text-start mx-3 my-1 fs-5"
+                   style="max-width: 600px; word-break: break-word;"></p>
+            </div>
+            <hr class="my-0">
+            <div class="d-flex fs-5 justify-content-center border border-3 my-0 border-dark">
+                <input id="chatInput" placeholder="Enter your message" class="w-50 my-3 border border-5 border-white"
+                       type="text">
+                <button onclick="sendMessage()" type="button" class="btn my-3 mx-2 fs-5 btn-sm btn-primary w-25">
+                    Send
+                </button>
+                <button onclick="sendMessage('¯\\_(ツ)_/¯')" type="button" class="btn my-3 fs-5 btn-sm btn-primary">
+                    ¯\_(ツ)_/¯
+                </button>
+            </div>
+            <hr class="p-0 my-0">
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../static/bootstrap.min.css">
+    <link rel="icon" type="image/x-icon" href="../static/favicon.png">
+    <title>MyCasino</title>
+</head>
+<body class="bg-dark text-white" style="height: 100vh">
+<nav th:fragment="nav (player)" class="navbar navbar-expand-md navbar-dark" style="background-color: #151515;">
+    <div class="container-fluid">
+        <a class="navbar-brand fs-5" th:href="@{/}">
+            <img src="../static/favicon.png" alt="Logo" width="32" height="32">
+            MyCasino
+        </a>
+        <div class="collapse navbar-collapse" id="navbarColor01">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="btn btn-primary m-1" aria-current="page" th:href="@{/roulette}">Go to roulette</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-primary m-1" th:text="${player.getName()}" aria-current="page" th:href="@{/profile}">Name</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-primary m-1" th:if="${player.isAdmin()}" aria-current="page" th:href="@{/admin}">Admin page</a>
+                </li>
+                <li class="nav-item">
+                    <form th:action="@{/logout}" th:method="POST">
+                        <button class="btn btn-primary m-1" type="submit">Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

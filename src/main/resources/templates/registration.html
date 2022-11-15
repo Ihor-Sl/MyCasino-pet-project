@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration page</title>
+    <link rel="stylesheet" href="../static/bootstrap.min.css">
+    <link rel="icon" type="image/x-icon" href="../static/favicon.png">
+</head>
+<body class="vh-100 d-flex justify-content-center align-items-center bg-dark text-white">
+<form th:object="${player}" style="background-color: #151515;" class="p-5 border border-dark rounded-5 border-5"
+      th:method="POST"
+      th:action="@{/registration}">
+    <h1>Registration</h1>
+    <div class="mb-3">
+        <label class="form-label" for="email">Enter email: </label>
+        <input class="form-control" type="text" th:field="*{email}" name="email" id="email">
+        <div class="alert alert-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="name">Enter name: </label>
+        <input class="form-control" type="text" th:field="*{name}" name="name" id="name">
+        <div class="alert alert-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="password">Enter password: </label>
+        <input class="form-control" type="password" th:field="*{password}" name="password" id="password">
+        <div class="alert alert-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+    </div>
+    <div class="mb-3 d-grid">
+        <button class="btn btn-primary" type="submit">Sing up!</button>
+    </div>
+    <div class="mb-3">
+        <a href="/login">Already have account? Sign in!</a>
+    </div>
+</form>
+</body>
+</html>

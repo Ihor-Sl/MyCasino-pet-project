@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    <link rel="stylesheet" href="../static/bootstrap.min.css">
+    <link rel="icon" type="image/x-icon" href="../static/favicon.png">
+</head>
+<body class="bg-dark text-white vh-100">
+<nav th:replace="~{fragments/nav :: nav (player=${player})}"></nav>
+<div class="container text-center mt-3">
+    <div class="row">
+        <div class="col-lg-4 fs-4">
+            <div class="card text-center" style="background-color: #151515;">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="card-img-top m-auto my-3"
+                     alt="..." style="width: 256px;">
+                <div class="card-body">
+                    <h2 class="card-title" th:text="${player.getName()}">Name</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8 fs-4">
+            <div style="background-color: #151515;" class="card">
+                <div class="card-header">Your data</div>
+                <ul style="background-color: #151515; border: none" class="list-group list-group text-start">
+                    <li class="list-group-item text-white d-flex justify-content-between w-50"
+                        style="background-color: #151515; border: none">Name:<span
+                            th:text="${player.getName()}" class="text-start w-50">value</span></li>
+                    <li class="list-group-item text-white d-flex justify-content-between w-50"
+                        style="background-color: #151515; border: none">Email:<span
+                            th:text="${player.getEmail()}" class="text-start w-50">value</span></li>
+                    <li class="list-group-item text-white d-flex justify-content-between w-50"
+                        style="background-color: #151515; border: none">Balance:
+                        <span class="text-start w-50"><span th:text="${player.getBalance()}">value</span>$</span>
+                    </li>
+                </ul>
+            </div>
+            <div style="background-color: #151515;" class="d-flex p-3 my-4 rounded">
+                <div>
+                    <a class="btn btn-primary" th:href="@{/editProfile}">Edit Profile</a>
+                </div>
+                <form th:action="@{/add100}" th:method="POST">
+                    <button class="btn btn-primary mx-3" type="submit">Add 100$</button>
+                </form>
+                <form th:action="@{/logout}" th:method="POST">
+                    <button class="btn btn-primary" type="submit">Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login page</title>
+    <link rel="stylesheet" href="../static/bootstrap.min.css">
+    <link rel="icon" type="image/x-icon" href="../static/favicon.png">
+</head>
+<body class="vh-100 d-flex justify-content-center align-items-center bg-dark text-white">
+<form style="background-color: #151515;" class="p-5 border border-dark rounded-5 border-5" th:method="POST"
+      th:action="@{/login-check}">
+    <h1>Please login</h1>
+    <div class="alert alert-danger" th:if="${param.error}">[[${session.SPRING_SECURITY_LAST_EXCEPTION.message}]]</div>
+    <div class="mb-3">
+        <label class="form-label" for="username">Enter email: </label>
+        <input class="form-control" type="text" name="username" id="username">
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="password">Enter password: </label>
+        <input class="form-control" type="password" name="password" id="password">
+    </div>
+    <div class="mb-3">
+        <label class="form-check-label" for="rememberMe">Remember me: </label>
+        <input type="checkbox" class="form-check-input" name="rememberMe" id="rememberMe">
+    </div>
+    <div class="mb-3 d-grid">
+        <button class="btn btn-primary" type="submit">Sign in!</button>
+    </div>
+    <hr>
+    <div class="mb-3"><a href="/registration">Don`t have account? Go to registration!</a></div>
+</form>
+</body>
+</html>

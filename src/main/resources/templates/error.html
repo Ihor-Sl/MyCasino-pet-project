@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../static/bootstrap.min.css">
+    <link rel="icon" type="image/x-icon" href="../static/favicon.png">
+    <title>MyCasino</title>
+<body>
+<div class="d-flex align-items-center justify-content-center vh-100 bg-dark">
+    <h1 class="display-1 fw-bold text-white">
+        <span th:text="${status + ' | ' + error}"></span>
+        <div class="d-flex justify-content-center mt-5">
+            <a class="btn btn-primary fs-2" th:href="@{/}">Back to Home Page</a>
+        </div>
+    </h1>
+</div>
+</body>
+</html>

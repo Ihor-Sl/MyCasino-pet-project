@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../static/bootstrap.min.css">
+    <link rel="icon" type="image/x-icon" href="../static/favicon.png">
+    <script defer src="../static/admin.js"></script>
+    <title>MyCasino</title>
+</head>
+<body class="bg-dark text-white">
+<nav th:replace="~{fragments/nav :: nav (player=${admin})}"></nav>
+<div class="container">
+    <h1>Hello admin!</h1>
+    <hr>
+    <h2>All players: </h2>
+</div>
+<div class="container" style="overflow-y: scroll; height: 70vh;">
+    <div th:each="player : ${playerList}" class="card mt-4" style="background-color: #151515;">
+        <div class="card-body d-flex justify-content-between">
+            <div>
+                <h5 th:text="${player.getName()}" class="card-title fs-4">Name</h5>
+                <p th:text="${player.getEmail()}" class="card-text m-0 fs-5">Email</p>
+                <p class="card-text m-0 fs-5">
+                    <span th:text="${player.getBalance()}">100</span>
+                    <span>$</span>
+                </p>
+            </div>
+            <button th:if="${player.isAccountNonLocked()}" th:id="${player.getId()}" th:attr="onclick=|ban(${player.getId})|"
+                    class="btn btn-danger m-auto mx-0" style="width: 200px; height: 50px">
+                Ban
+            </button>
+            <button th:if="${!player.isAccountNonLocked()}" th:id="${player.getId()}" th:attr="onclick=|unBan(${player.getId})|"
+                    class="btn btn-success m-auto mx-0" style="width: 200px; height: 50px">
+                Unban
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
