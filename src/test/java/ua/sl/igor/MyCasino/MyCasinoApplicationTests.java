@@ -1,6 +1,7 @@
 package ua.sl.igor.MyCasino;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ua.sl.igor.MyCasino.DTO.MakeBetDTO;
@@ -10,6 +11,7 @@ import ua.sl.igor.MyCasino.services.PlayerService;
 import ua.sl.igor.MyCasino.services.RouletteService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class MyCasinoApplicationTests {
@@ -32,6 +34,16 @@ class MyCasinoApplicationTests {
         makeTestBet(player, 400, BetColor.RED, false);
         makeTestBet(player, 500, BetColor.BLACK, false);
         makeTestBet(player, 600, BetColor.GREEN, false);
+    }
+
+    @Test
+    public void mockitoTest() {
+        Player player = Mockito.mock(Player.class);
+        when(player.getId()).thenReturn(1L);
+        player.getId();
+        player.getId();
+        // times(), never(), atLeast(), atMost(), only()!
+        verify(player, times(2)).getId();
     }
 
     private void makeTestBet(Player player, long amount, BetColor betColor, boolean isWin) {
