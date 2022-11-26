@@ -34,6 +34,6 @@ class RouletteBetsServiceTest {
     @Test
     void clearAllBids() {
         rouletteBetsService.clearAllBids();
-        assertEquals(rouletteBetsService.findAll(), Collections.emptyList());
+        assertEquals(Collections.emptyList(), rouletteBetsService.findAll());
     }
 }

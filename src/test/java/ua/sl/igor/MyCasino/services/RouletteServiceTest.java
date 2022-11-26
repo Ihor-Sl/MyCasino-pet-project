@@ -33,8 +33,8 @@ class RouletteServiceTest {
     }
 
     private void makeTestBet(Player player, long amount, BetColor betColor, boolean isWin) {
-        player = playerService.findById(player.getId());
         playerService.increasePlayerBalance(player.getId(), amount);
+        player = playerService.findById(player.getId());
 
         long oldBalance = player.getBalance();
         int winNumber = 0;
@@ -62,10 +62,10 @@ class RouletteServiceTest {
 
         player = playerService.findById(player.getId());
         if (isWin) {
-            assertEquals(player.getBalance(), oldBalance + amount * winCoef);
+            assertEquals((oldBalance - amount) + amount * winCoef, player.getBalance());
             playerService.decreasePlayerBalance(player.getId(), amount * winCoef);
         } else {
-            assertEquals(player.getBalance(), oldBalance);
+            assertEquals(oldBalance - amount, player.getBalance());
         }
     }
 }
