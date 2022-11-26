@@ -12,7 +12,6 @@ import ua.sl.igor.MyCasino.domain.Player;
 import ua.sl.igor.MyCasino.domain.RouletteBet;
 import ua.sl.igor.MyCasino.domain.enums.BetColor;
 import ua.sl.igor.MyCasino.util.exceptions.MakeBetException;
-import ua.sl.igor.MyCasino.util.exceptions.PlayerNotFoundException;
 import ua.sl.igor.MyCasino.util.exceptions.WaitBeginningOfTheGame;
 
 import javax.annotation.PostConstruct;
@@ -44,7 +43,7 @@ public class RouletteService implements Runnable {
             if (makeBetDTO.getAmount() < 1) {
                 throw new MakeBetException();
             }
-            player = playerService.findById(player.getId()).orElseThrow(PlayerNotFoundException::new);
+            player = playerService.findById(player.getId());
             playerService.decreasePlayerBalance(player.getId(), makeBetDTO.getAmount());
             rouletteBetsService.registerBet(player, makeBetDTO.getAmount(), makeBetDTO.getBetColor());
             return new BetDTO(player, makeBetDTO.getAmount(), makeBetDTO.getBetColor());
@@ -68,7 +67,7 @@ public class RouletteService implements Runnable {
                 simpMessagingTemplate.convertAndSendToUser(
                         betOwner.getEmail(),
                         "/topic/console",
-                        new RouletteResultDTO(true, playerService.findById(betOwner.getId()).get().getBalance()));
+                        new RouletteResultDTO(true, playerService.findById(betOwner.getId()).getBalance()));
             } else {
                 simpMessagingTemplate.convertAndSendToUser(
                         betOwner.getEmail(),

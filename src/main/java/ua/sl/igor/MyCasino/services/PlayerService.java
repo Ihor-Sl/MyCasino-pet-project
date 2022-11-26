@@ -3,16 +3,11 @@ package ua.sl.igor.MyCasino.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import ua.sl.igor.MyCasino.domain.Player;
@@ -22,7 +17,6 @@ import ua.sl.igor.MyCasino.util.exceptions.NotEnoughMoneyException;
 import ua.sl.igor.MyCasino.util.exceptions.PlayerNotFoundException;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PlayerService implements UserDetailsService, Validator {
@@ -38,8 +32,14 @@ public class PlayerService implements UserDetailsService, Validator {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public void increasePlayerBalance(long id, long amount) {
+        Player player = findById(id);
+        player.setBalance(player.getBalance() + amount);
+        save(player);
+    }
+
     public void decreasePlayerBalance(long id, long amount) {
-        Player player = findById(id).orElseThrow(PlayerNotFoundException::new);
+        Player player = findById(id);
         if (player.getBalance() < amount) {
             throw new NotEnoughMoneyException();
         }
@@ -47,33 +47,14 @@ public class PlayerService implements UserDetailsService, Validator {
         save(player);
     }
 
-    public void increasePlayerBalance(long id, long amount) {
-        Player player = findById(id).orElseThrow(PlayerNotFoundException::new);
-        player.setBalance(player.getBalance() + amount);
-        save(player);
-    }
-
     public boolean changePassword(Player player, String oldPassword, String newPassword) {
-        Player playerDB = findById(player.getId()).orElseThrow(PlayerNotFoundException::new);
+        Player playerDB = findById(player.getId());
         if (passwordEncoder.matches(oldPassword, playerDB.getPassword())) {
             playerDB.setPassword(passwordEncoder.encode(newPassword));
             save(playerDB);
             return true;
         }
         return false;
-    }
-
-    public void ban(long id) {
-        Player player = findById(id).orElseThrow(PlayerNotFoundException::new);
-        jdbcTemplate.update("DELETE FROM spring_session WHERE principal_name=?", player.getEmail());
-        player.setAccountNonLocked(false);
-        save(player);
-    }
-
-    public void unBan(long id) {
-        Player player = findById(id).orElseThrow(PlayerNotFoundException::new);
-        player.setAccountNonLocked(true);
-        save(player);
     }
 
     public void register(Player player) {
@@ -83,55 +64,28 @@ public class PlayerService implements UserDetailsService, Validator {
         save(player);
     }
 
-    public String changePlayer(Player player,
-                               String newEmail,
-                               String newName,
-                               BindingResult bindingResult,
-                               Model model
-    ) {
-        player = findById(player.getId()).orElseThrow(PlayerNotFoundException::new);
-        model.addAttribute("player", player);
-        if (player.getName().equals(newName) && player.getEmail().equals(newEmail)) {
-            return "redirect:/profile";
-        } else {
-            boolean isSomeIsTaken = false;
-            String sameName = null;
-            String sameEmail = null;
-            Optional<Player> sameNamePlayer = findByName(newName);
-            Optional<Player> sameEmailPlayer = findByEmail(newEmail);
-            if (sameNamePlayer.isPresent()) {
-                sameName = sameNamePlayer.get().getName();
-            }
-            if (sameEmailPlayer.isPresent()) {
-                sameEmail = sameEmailPlayer.get().getEmail();
-            }
-            if (newName.equals(sameName) && !(player.getName().equals(sameName))) {
-                model.addAttribute("nameError", "This name is already taken!");
-                isSomeIsTaken = true;
-            }
-            if (newEmail.equals(sameEmail) && !(player.getEmail().equals(sameEmail))) {
-                model.addAttribute("emailError", "This email is already taken!");
-                isSomeIsTaken = true;
-            }
-            if (bindingResult.hasErrors()) {
-                return "editProfile";
-            }
-            if (isSomeIsTaken) {
-                return "editProfile";
-            }
-        }
-
-        player.setName(newName);
-        player.setEmail(newEmail);
+    public void ban(long id) {
+        Player player = findById(id);
+        jdbcTemplate.update("DELETE FROM spring_session WHERE principal_name=?", player.getEmail());
+        player.setAccountNonLocked(false);
         save(player);
-
-        Authentication oldAuth = SecurityContextHolder.getContext().getAuthentication();
-        Authentication newAuth = new UsernamePasswordAuthenticationToken(player, oldAuth.getCredentials(), oldAuth.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(newAuth);
-
-        return "redirect:/profile";
     }
 
+    public void unBan(long id) {
+        Player player = findById(id);
+        player.setAccountNonLocked(true);
+        save(player);
+    }
+
+    public boolean canPlayerSetThisName(Player player, String name) {
+        if (player.getName().equals(name)) return true;
+        return !playerRepository.existsByName(name);
+    }
+
+    public boolean canPlayerSetThisEmail(Player player, String email) {
+        if (player.getEmail().equals(email)) return true;
+        return !playerRepository.existsByEmail(email);
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -146,10 +100,10 @@ public class PlayerService implements UserDetailsService, Validator {
     @Override
     public void validate(Object target, Errors errors) {
         Player player = (Player) target;
-        if (findByEmail(player.getEmail()).isPresent()) {
+        if (playerRepository.existsByEmail(player.getEmail())) {
             errors.rejectValue("email", "", "This email is already taken!");
         }
-        if (findByName(player.getName()).isPresent()) {
+        if (playerRepository.existsByName(player.getName())) {
             errors.rejectValue("name", "", "This name is already taken!");
         }
 
@@ -159,16 +113,16 @@ public class PlayerService implements UserDetailsService, Validator {
         return playerRepository.save(player);
     }
 
-    public Optional<Player> findById(long id) {
-        return playerRepository.findById(id);
+    public Player findById(long id) {
+        return playerRepository.findById(id).orElseThrow(PlayerNotFoundException::new);
     }
 
-    public Optional<Player> findByEmail(String email) {
-        return playerRepository.findByEmail(email);
+    public Player findByEmail(String email) {
+        return playerRepository.findByEmail(email).orElseThrow(PlayerNotFoundException::new);
     }
 
-    public Optional<Player> findByName(String name) {
-        return playerRepository.findByName(name);
+    public Player findByName(String name) {
+        return playerRepository.findByName(name).orElseThrow(PlayerNotFoundException::new);
     }
 
     public List<Player> findAll() {

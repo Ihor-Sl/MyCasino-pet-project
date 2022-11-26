@@ -21,7 +21,6 @@ import ua.sl.igor.MyCasino.services.PlayerService;
 import ua.sl.igor.MyCasino.services.RouletteService;
 import ua.sl.igor.MyCasino.util.exceptions.MakeBetException;
 import ua.sl.igor.MyCasino.util.exceptions.NotEnoughMoneyException;
-import ua.sl.igor.MyCasino.util.exceptions.PlayerNotFoundException;
 import ua.sl.igor.MyCasino.util.exceptions.WaitBeginningOfTheGame;
 
 import javax.validation.Valid;
@@ -43,7 +42,7 @@ public class RouletteController {
     public String index(@AuthenticationPrincipal Player player,
                         Model model
     ) {
-        model.addAttribute("player", playerService.findById(player.getId()).orElseThrow(PlayerNotFoundException::new));
+        model.addAttribute("player", playerService.findById(player.getId()));
         model.addAttribute("lastWinNumber", rouletteService.getLastWinNumber());
         return "roulette";
     }

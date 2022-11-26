@@ -30,11 +30,11 @@ public class RouletteBetsService {
         rouletteBetRepository.save(rouletteBet);
     }
 
-    public List<RouletteBet> findAll() {
-        return rouletteBetRepository.findAll();
-    }
-
     public void clearAllBids() {
         jdbcTemplate.update("TRUNCATE roulette_bet; ALTER SEQUENCE roulette_bet_id_seq RESTART WITH 1;");
+    }
+
+    public List<RouletteBet> findAll() {
+        return rouletteBetRepository.findAll();
     }
 }

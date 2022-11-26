@@ -1,7 +1,10 @@
 package ua.sl.igor.MyCasino.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -12,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ua.sl.igor.MyCasino.DTO.EditPlayerDTO;
 import ua.sl.igor.MyCasino.domain.Player;
 import ua.sl.igor.MyCasino.services.PlayerService;
-import ua.sl.igor.MyCasino.util.exceptions.PlayerNotFoundException;
 
 import javax.validation.Valid;
 
@@ -33,7 +35,7 @@ public class PlayerController {
 
     @GetMapping("/profile")
     public String profile(@AuthenticationPrincipal Player player, Model model) {
-        model.addAttribute("player", playerService.findById(player.getId()).orElseThrow(PlayerNotFoundException::new));
+        model.addAttribute("player", playerService.findById(player.getId()));
         return "profile";
     }
 
@@ -60,7 +62,7 @@ public class PlayerController {
 
     @GetMapping("/editProfile")
     private String editProfile(@AuthenticationPrincipal Player player, @ModelAttribute("editPlayer") EditPlayerDTO editPlayerDTO, Model model) {
-        model.addAttribute("player", playerService.findById(player.getId()).orElseThrow(PlayerNotFoundException::new));
+        model.addAttribute("player", playerService.findById(player.getId()));
         return "editProfile";
     }
 
@@ -70,7 +72,37 @@ public class PlayerController {
                                      BindingResult bindingResult,
                                      Model model
     ) {
-        return playerService.changePlayer(player, editPlayerDTO.getEmail(), editPlayerDTO.getName(), bindingResult, model);
+        player = playerService.findById(player.getId());
+        model.addAttribute("player", player);
+        if (player.getName().equals(editPlayerDTO.getName()) && player.getEmail().equals(editPlayerDTO.getEmail())) {
+            return "redirect:/profile";
+        } else {
+            boolean isSomeIsTaken = false;
+            if (!playerService.canPlayerSetThisName(player, editPlayerDTO.getName())) {
+                model.addAttribute("nameError", "This name is already taken!");
+                isSomeIsTaken = true;
+            }
+            if (!playerService.canPlayerSetThisEmail(player, editPlayerDTO.getEmail())) {
+                model.addAttribute("emailError", "This email is already taken!");
+                isSomeIsTaken = true;
+            }
+            if (bindingResult.hasErrors()) {
+                return "editProfile";
+            }
+            if (isSomeIsTaken) {
+                return "editProfile";
+            }
+        }
+
+        player.setName(editPlayerDTO.getName());
+        player.setEmail(editPlayerDTO.getEmail());
+        playerService.save(player);
+
+        Authentication oldAuth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication newAuth = new UsernamePasswordAuthenticationToken(player, oldAuth.getCredentials(), oldAuth.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
+
+        return "redirect:/profile";
     }
 
     @PostMapping("/changePassword")
