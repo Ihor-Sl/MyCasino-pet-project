@@ -9,6 +9,9 @@ ___
     * :speech_balloon: WebSockets
     * :elephant: PostgreSQL
 * HTML, CSS (Bootstrap), JavaScript
+* Testing:
+    * :test_tube: JUnit
+    * :cocktail: Mockito
 ## Possibilities
 * :gear: Create, edit, manage player account
 * :moneybag: Make bets by playing roulette
