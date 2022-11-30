@@ -2,18 +2,18 @@ package ua.sl.igor.MyCasino.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import ua.sl.igor.MyCasino.services.PlayerService;
 
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+//@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class SecurityConfig {
 
     private final PlayerService playerService;
 
@@ -22,41 +22,40 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         this.playerService = playerService;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/admin")
-                .hasRole("ADMIN")
-                .antMatchers("/login", "/registration", "/error", "/static/**")
-                .permitAll()
-                .anyRequest()
-                .hasAnyRole("USER", "ADMIN")
-                .and()
-                .formLogin()
-                .loginPage("/login")
-                .loginProcessingUrl("/login-check")
-                .defaultSuccessUrl("/roulette", true)
-                .failureUrl("/login?error")
-                .and()
-                .rememberMe()
-                .rememberMeParameter("rememberMe")
-                .tokenValiditySeconds(1209600)
-                .and()
-                .logout()
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login");
+    @Bean
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+        return http
+                .authorizeRequests(auth -> {
+                    auth.antMatchers("/admin").hasRole("ADMIN");
+                    auth.antMatchers("/login", "/registration", "/error", "/static/**").permitAll();
+                    auth.anyRequest().hasAnyRole("USER", "ADMIN");
+                })
+                .formLogin(form -> {
+                    form.loginPage("/login");
+                    form.loginProcessingUrl("/login-check");
+                    form.defaultSuccessUrl("/roulette", true);
+                    form.failureUrl("/login?error");
+                })
+                .rememberMe(me -> {
+                    me.rememberMeParameter("rememberMe");
+                    me.tokenValiditySeconds(1209600);
+                })
+                .logout(logout -> {
+                    logout.logoutUrl("/logout");
+                    logout.logoutSuccessUrl("/login");
+                })
+                .build();
     }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(playerService)
-                .passwordEncoder(passwordEncoder());
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.userDetailsService(playerService).passwordEncoder(passwordEncoder());
+        return authenticationManagerBuilder.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(8);
     }
-
 }
